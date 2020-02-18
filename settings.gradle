@@ -1,1 +1,1 @@
-include ':app', ':jiagu'
+include ':app', ':jiagu', ':decryptdex'
