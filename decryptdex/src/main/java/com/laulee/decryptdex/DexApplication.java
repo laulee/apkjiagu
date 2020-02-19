@@ -21,8 +21,8 @@ public class DexApplication extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-
         File dirFile = new File(getApplicationInfo().sourceDir);
+        System.out.println(dirFile.getAbsolutePath());
         //保密模式创建文件
         File unzipFile = getDir("dex_apk", MODE_PRIVATE);
         File app = new File(unzipFile, "app");
@@ -36,7 +36,6 @@ public class DexApplication extends Application {
                     return pathname.getName().endsWith(".dex");
                 }
             });
-            Log.d("DexApplication", "dex size = " + files.length);
             //解密dex
             File shellDex = null;
             File mainDex = null;
@@ -50,10 +49,8 @@ public class DexApplication extends Application {
                     AES.decrypt(file);
                     //解密main
                     if (fileName.equals("dump.dex")) {
-                        Log.d("DexApplication", "dump dex");
                         mainDex = file;
                     } else {
-                        Log.d("DexApplication add", fileName);
                         decryptDexs.add(file);
                     }
                 }
@@ -78,7 +75,8 @@ public class DexApplication extends Application {
             Log.d("DexApplication", "decryptDexs size = " + files.length);
 
             try {
-                V19.install(getClassLoader(), decryptDexs, unzipFile);
+                //7.0+反射makeDexElement参数多ClassLoader
+                MultiDex.installSecondaryDexes(getClassLoader(), unzipFile, decryptDexs);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (NoSuchFieldException e) {
@@ -86,6 +84,12 @@ public class DexApplication extends Application {
             } catch (InvocationTargetException e) {
                 e.printStackTrace();
             } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

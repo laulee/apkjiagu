@@ -17,7 +17,6 @@ public class Main {
         String apkPath = "app/build/outputs/apk/debug/app-debug.apk";
         //解压apk文件
         Zip.unZip(apkPath, targetDir);
-
         //获取apk解压文件中的dex文件
         File[] apkDexFiles = new File(targetDir).listFiles(new FileFilter() {
             @Override
@@ -26,12 +25,12 @@ public class Main {
             }
         });
 
+        System.out.println("apkDexFiles size is " + apkDexFiles.length);
         //创建一个壳dex，通过aar的方式解压得到classes.jar,通过dx命令将jar转化成dex
         String aarPath = "decryptdex/build/outputs/aar/decryptdex-release.aar";
         String aarUnZipPath = "app/build/outputs/apk/debug/decryptdex-release";
         //解压aar获取classes.jar
         Zip.unZip(aarPath, aarUnZipPath);
-
         File aarFile = new File(aarUnZipPath);
         if (aarFile.exists()) {
             File[] files = aarFile.listFiles(new FileFilter() {
@@ -43,22 +42,24 @@ public class Main {
             File classJarFile = files[0];
             //通过命令进行jar to dex 转化
             File classDexFile = jar2dex(classJarFile, aarUnZipPath);
-            //采用主dex加密放入壳classes.dex中，其他dex加密
+            //采用主dex加密放入dump.dex中，其他dex加密
             File mainDexFile = null;
             byte[] mainDexByte = new byte[0];
             for (File apkDexFile : apkDexFiles) {
+                //如果是主dex 保存下来
                 if (apkDexFile.getName().endsWith("classes.dex")) {
                     try {
                         mainDexFile = apkDexFile;
-                        mainDexByte = AES.encrypt(Util.getBytes(apkDexFile));
+                        AES.encrypt2File(apkDexFile);
+//                        mainDexByte = AES.encrypt(Util.getBytes(apkDexFile));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-                AES.encrypt2File(apkDexFile);
+                AES.encrypt(apkDexFile);
             }
             //将主dex加载到壳dex文件中
-            if (mainDexByte != null && mainDexByte.length > 0) {
+            if (mainDexByte != null) {
                 //创建一个byte[] =壳dex长度+maindex长度+4字节的长度值
                 try {
                     byte[] classesBytes = Util.getBytes(classDexFile);

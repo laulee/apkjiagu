@@ -34,7 +34,6 @@ public class Zip {
             if (!file.exists()) {
                 file.mkdirs();
             }
-//            targetDir = targetDir + "/" + zipFile.getName();
             Enumeration<?> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry zipEntry = (ZipEntry) entries.nextElement();
@@ -102,81 +101,4 @@ public class Zip {
         }
     }
 
-    /**
-     * 压缩
-     *
-     * @param zipFilePath
-     * @param unsignApk
-     */
-    public static void zip(String zipFilePath, String unsignApk) {
-
-        File zipFile = new File(zipFilePath);
-        if (zipFile.exists()) {
-            File unsignFile = new File(unsignApk);
-            try {
-                //创建文件
-                CheckedOutputStream checkedOutputStream = new CheckedOutputStream(new FileOutputStream(unsignFile), new CRC32());
-                ZipOutputStream zipOutputStream = new ZipOutputStream(checkedOutputStream);
-                compress(zipFile, zipOutputStream, "");
-                zipOutputStream.flush();
-                zipOutputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-    }
-
-    /**
-     * 压缩
-     *
-     * @param zipFile
-     * @param zipOutputStream
-     * @param basePath
-     */
-    private static void compress(File zipFile, ZipOutputStream zipOutputStream, String basePath)
-            throws Exception {
-        if (zipFile.isDirectory()) {
-            File[] files = zipFile.listFiles();
-            for (File file : files) {
-                compress(file, zipOutputStream, basePath + zipFile.getName() + "/");
-            }
-        } else {
-            compressFile(zipFile, zipOutputStream, basePath);
-        }
-
-    }
-
-    /**
-     * @param zipFile
-     * @param zipOutputStream
-     * @param basePath
-     */
-    private static void compressFile(File zipFile, ZipOutputStream zipOutputStream, String basePath)
-            throws Exception {
-        String fullName = basePath + zipFile.getName();
-        String[] fileNames = fullName.split("/");
-        StringBuilder stringBuilder = new StringBuilder();
-        if (fileNames.length > 1) {
-            for (int i = 1; i < fileNames.length; i++) {
-                stringBuilder.append("/");
-                stringBuilder.append(fileNames[i]);
-            }
-        } else {
-            stringBuilder.append("/");
-        }
-
-        ZipEntry zipEntry = new ZipEntry(stringBuilder.substring(1));
-        zipOutputStream.putNextEntry(zipEntry);
-        FileInputStream fileInputStream = new FileInputStream(zipFile);
-        int length;
-        byte[] data = new byte[2048];
-        while ((length = fileInputStream.read(data, 0, 2048)) != -1) {
-            zipOutputStream.write(data, 0, length);
-        }
-        fileInputStream.close();
-        zipOutputStream.closeEntry();
-    }
 }
