@@ -22,7 +22,6 @@ public class DexApplication extends Application {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         File dirFile = new File(getApplicationInfo().sourceDir);
-        System.out.println(dirFile.getAbsolutePath());
         //保密模式创建文件
         File unzipFile = getDir("dex_apk", MODE_PRIVATE);
         File app = new File(unzipFile, "app");
@@ -90,6 +89,19 @@ public class DexApplication extends Application {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        //替换自己的application
+        File appTxt = new File(app.getAbsolutePath() + "/app.txt");
+        if (appTxt.exists()) {
+            try {
+                byte[] bytes = AES.getBytes(appTxt);
+                String appName = new String(bytes);
+                System.out.println("读取appName" + appName);
+
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
