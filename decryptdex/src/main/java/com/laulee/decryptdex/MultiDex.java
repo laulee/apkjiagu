@@ -337,7 +337,7 @@ public final class MultiDex {
                         findMethod(dexPathList, "makeDexElements", List.class, File.class,
                                 List.class, ClassLoader.class);
                 return (Object[]) makeDexElements.invoke(dexPathList, files, optimizedDirectory,
-                        suppressedExceptions,classloader);
+                        suppressedExceptions, classloader);
             }
             //6.0+
             else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
